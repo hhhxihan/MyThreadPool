@@ -3,8 +3,8 @@
 #include <mutex>
 #include <queue>
 
-Template<typename T>
-class SafaQueue{
+template<typename T>
+class SafeQueue{
     private:
         std::queue<T> m_queue;
         std::mutex mux;

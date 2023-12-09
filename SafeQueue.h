@@ -1,10 +1,9 @@
 //支持互斥访问的队列
-//mutex
 
 #include <mutex>
 #include <queue>
 
-Template<T>
+Template<typename T>
 class SafaQueue{
     private:
         std::queue<T> m_queue;
@@ -23,4 +22,4 @@ class SafaQueue{
         int size();
 
     
-}
+};

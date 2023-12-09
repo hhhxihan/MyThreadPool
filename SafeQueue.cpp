@@ -1,25 +1,28 @@
 #include "SafeQueue.h"
 
-
-bool SafeQueue::push(T&& value){
+template<typename T>
+bool SafeQueue<T>::push(T&& value){
     std::lock_guard<std::mutex> lock(mux);
     m_queue.push(value);
     
-    
+    return true;
 }
 
-void SafeQueue::front_pop(T& value){
+template<typename T>
+void SafeQueue<T>::front_pop(T& value){
     std::lock_guard<std::mutex> lock(mux);
     m_queue.front(value);
     m_queue.pop();
 }
 
-bool SafeQueue::empty(){
+template<typename T>
+bool SafeQueue<T>::empty(){
     std::lock_guard<std::mutex> lock(mux);
-    m_queue.empty();
+    return m_queue.empty();
 }
 
-int SafeQueue::size(){
+template<typename T>
+int SafeQueue<T>::size(){
     std::lock_guard<std::mutex> lock(mux);
-    m_queue.size();
+    return m_queue.size();
 }

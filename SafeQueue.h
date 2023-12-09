@@ -13,7 +13,7 @@ class SafeQueue{
         SafeQueue(); //构造函数
         ~SafeQueue(); 
 
-        bool push(T value);
+        bool push(T&& value);
 
         void front_pop(T& value);
 

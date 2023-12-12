@@ -11,9 +11,9 @@
 class MyThreadPool{
     private:
         //任务队列queue
-        std::vector<std::thread> threadPool;
-        std::condition_variable cv; //
-        bool is_shutdown;
+        std::vector<std::thread> threadPool; //线程池
+        std::condition_variable cv; //用于等待任务队列的条件变量
+        bool is_shutdown; //判断是不是关闭
         SafeQueue::SafeQueue<std::function<void()>> task; //任务队列
         int task_size; //当前任务数量
         std::mutex cv_mux; //互斥锁
@@ -54,10 +54,14 @@ class MyThreadPool{
             }
         }
 
+        //因为我们可能还想要获取函数的执行结果，那submit函数最好返回类型为
+        //std::future<任务返回类型>  也即std::future<decltype(f(args...));
+        //用尾类型推导来写。
         template<typename F,typename ...Args> //目前不是一个异步函数
-        auto submit(F &&f,Args &&...args)->decltype(f(...args)){
-            auto func=std::bind(std::forward<F>(f),std::bind<Args>(args)...);
-            auto funcPtr=std::make_share<decltype(f(args...))>(func);
+        auto submit(F &&f,Args &&...args)->std::future<decltype(f(args...))>{
+            auto func=std::bind(std::forward<F>(f),std::bind<Args>(args)...); //用bind函数，把函数与参数绑定
+            auto funcPtr=std::make_share<s td::packaged_task<decltype(f(args...))()> >(func);  //获得指针，这一步目前是多余的，可以直接func()
+            //可能要封装成异步任务，因为以后还要获取任务的结果
             
             std::function<void()> myfunc=[funcPtr](){
                 (*funcPtr)();
@@ -65,5 +69,7 @@ class MyThreadPool{
 
             task.push_back(myfunc);
             cv.notify_one(); //唤醒一个线程
+
+            return (*funcPtr).get_future();
         }
 };

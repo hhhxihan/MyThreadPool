@@ -16,6 +16,7 @@ class MyThreadPool{
         std::vector<std::thread> threadPool; //线程池
         std::condition_variable cv; //用于等待任务队列的条件变量
         bool is_shutdown; //判断是不是关闭
+        int thread_num;
         SafeQueue<std::function<void()> > task; //任务队列
         int task_size; //当前任务数量
         std::mutex cv_mux; //互斥锁
@@ -35,14 +36,15 @@ class MyThreadPool{
                     //信号量，标记有多少资源量，如果没有资源了，阻塞线程；等有任务了，再唤醒；可以
                     //条件变量，条件设为任务队列是不是空。如果为空，那么wait挂起等嗲唤醒
                     while(!thispool->is_shutdown){
-                        std::unique_lock lock(thispool->cv_mux);
-                        if(thispool->task.empty()){
-                            //任务列表为空
-                            thispool->cv.wait(lock);
+                        {
+                            std::unique_lock lock(thispool->cv_mux);
+                            if(thispool->task.empty()){
+                                //任务列表为空
+                                thispool->cv.wait(lock);
+                            }
+                            //此处为获得了锁，且任务队列不为空
+                            thispool->task.front_pop(func);
                         }
-                        //此处为获得了锁，且任务队列不为空
-                        thispool->task.front_pop(func);
-                        
                         func();
                     }
                     
@@ -51,10 +53,10 @@ class MyThreadPool{
         };
     
     public:
-        MyThreadPool(int thread_num=10):threadPool(thread_num),is_shutdown(false),task_size(0){}   //构造函数
+        MyThreadPool(int threadnum=10):threadPool(threadnum),thread_num(threadnum),is_shutdown(false),task_size(0){}   //构造函数
 
         void init(){ //初始化线程池
-            for(int i=0;i<threadPool.size();i++){
+            for(int i=0;i<thread_num;i++){
                 threadPool[i]=std::thread(threadfunc(this,i)); 
             }
         }

@@ -1,4 +1,9 @@
 #include "SafeQueue.h"
+template<typename T>
+SafeQueue<T>::SafeQueue(){};
+
+template<typename T>
+SafeQueue<T>::~SafeQueue(){};
 
 template<typename T>
 bool SafeQueue<T>::push(T&& value){
@@ -11,7 +16,7 @@ bool SafeQueue<T>::push(T&& value){
 template<typename T>
 void SafeQueue<T>::front_pop(T& value){
     std::lock_guard<std::mutex> lock(mux);
-    m_queue.front(value);
+    value=m_queue.front();
     m_queue.pop();
 }
 

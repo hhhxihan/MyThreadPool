@@ -21,7 +21,7 @@ class MyThreadPool{
         int task_size; //当前任务数量
         std::mutex cv_mux; //互斥锁
 
-        class threadfunc{ //类必须在MythreadPool类中声明，因为用到全局的condition_variable;
+        class threadfunc{ 
             private:
                 MyThreadPool* thispool;
                 int m_id;
